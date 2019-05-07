@@ -1,0 +1,4 @@
+.idea
+back/.idea
+back/ecosystem.config.json
+back/node_modules
