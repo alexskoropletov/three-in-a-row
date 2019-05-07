@@ -248,8 +248,8 @@ class playGame extends Phaser.Scene {
       let sprite = this.poolArray.pop();
       sprite.alpha = 1;
       sprite.y = gameOptions.boardOffset.y + gameOptions.gemSize * (movement.row - movement.deltaRow + 1) - gameOptions.gemSize / 2;
-      sprite.x = gameOptions.boardOffset.x + gameOptions.gemSize * movement.column + gameOptions.gemSize / 2,
-        sprite.setFrame(this.match3.valueAt(movement.row, movement.column));
+      sprite.x = gameOptions.boardOffset.x + gameOptions.gemSize * movement.column + gameOptions.gemSize / 2;
+      sprite.setFrame(this.match3.valueAt(movement.row, movement.column));
       this.match3.setCustomData(movement.row, movement.column, sprite);
       this.tweens.add({
         targets: sprite,
