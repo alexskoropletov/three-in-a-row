@@ -1,3 +1,6 @@
+const crypto = window.crypto || window.msCrypto;
+const randomArray = new Uint32Array(1);
+
 const extraMatches = [
   {
     type: 'proton',
@@ -66,7 +69,7 @@ class Match3 {
       this.gameArray[i] = [];
       for (let j = 0; j < this.columns; j++) {
         do {
-          let randomValue = Math.floor(Math.random() * this.items);
+          let randomValue = Math.floor(crypto.getRandomValues(randomArray) * this.items);
           this.gameArray[i][j] = {
             value: randomValue,
             quark: quarks[randomValue],
@@ -399,7 +402,7 @@ class Match3 {
       if (this.isEmpty(0, i)) {
         let emptySpaces = this.emptySpacesBelow(0, i) + 1;
         for (let j = 0; j < emptySpaces; j++) {
-          let randomValue = Math.floor(Math.random() * this.items);
+          let randomValue = Math.floor(crypto.getRandomValues(randomArray) * this.items);
           result.push({
             row: j,
             column: i,
