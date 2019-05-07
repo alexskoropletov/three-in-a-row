@@ -1,4 +1,5 @@
 .idea
 back/.idea
+back/.scannerwork
 back/ecosystem.config.json
 back/node_modules
