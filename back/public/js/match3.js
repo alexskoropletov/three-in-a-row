@@ -1,5 +1,16 @@
 const crypto = window.crypto || window.msCrypto;
-const randomArray = new Uint32Array(1);
+
+function getRandomValue(max) {
+  const byteArray = new Uint8Array(1);
+  crypto.getRandomValues(byteArray);
+
+  const range = max - 1;
+  const max_range = 256;
+  if (byteArray[0] >= Math.floor(max_range / range) * range) {
+    return getRandomValue(0, max);
+  }
+  return byteArray[0] % range;
+}
 
 const extraMatches = [
   {
@@ -69,7 +80,7 @@ class Match3 {
       this.gameArray[i] = [];
       for (let j = 0; j < this.columns; j++) {
         do {
-          let randomValue = Math.floor(crypto.getRandomValues(randomArray) * this.items);
+          let randomValue = getRandomValue(this.items);
           this.gameArray[i][j] = {
             value: randomValue,
             quark: quarks[randomValue],
@@ -402,7 +413,7 @@ class Match3 {
       if (this.isEmpty(0, i)) {
         let emptySpaces = this.emptySpacesBelow(0, i) + 1;
         for (let j = 0; j < emptySpaces; j++) {
-          let randomValue = Math.floor(crypto.getRandomValues(randomArray) * this.items);
+          let randomValue = getRandomValue(this.items);
           result.push({
             row: j,
             column: i,

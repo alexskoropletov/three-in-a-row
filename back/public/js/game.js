@@ -43,23 +43,19 @@ class playGame extends Phaser.Scene {
       if (this.match3.validPick(row, col)) {
         let selectedGem = this.match3.getSelectedItem();
         if (!selectedGem) {
-          console.log('[0] row / col: ', row, col);
           this.match3.customDataOf(row, col).setScale(1.2);
           this.match3.customDataOf(row, col).setDepth(1);
           this.match3.setSelectedItem(row, col);
         } else {
           if (this.match3.areTheSame(row, col, selectedGem.row, selectedGem.column)) {
-            console.log('[1] row / col: ', row, col);
             this.match3.customDataOf(row, col).setScale(1);
             this.match3.deleselectItem();
           } else {
             if (this.match3.areNext(row, col, selectedGem.row, selectedGem.column)) {
-              console.log('[2] row / col: ', row, col);
               this.match3.customDataOf(selectedGem.row, selectedGem.column).setScale(1);
               this.match3.deleselectItem();
               this.swapGems(row, col, selectedGem.row, selectedGem.column, true);
             } else {
-              console.log('[3] row / col: ', row, col);
               this.match3.customDataOf(selectedGem.row, selectedGem.column).setScale(1);
               this.match3.customDataOf(row, col).setScale(1.2);
               this.match3.setSelectedItem(row, col);
@@ -75,8 +71,6 @@ class playGame extends Phaser.Scene {
     this.swappingGems = 2;
     this.canPick = false;
     movements.forEach(function (movement) {
-      // console.log('[!] movement row / col: ', movement.row, movement.column);
-      console.log('[4] row / col: ', movement.row, movement.column);
       this.tweens.add({
         targets: this.match3.customDataOf(movement.row, movement.column),
         x: this.match3.customDataOf(movement.row, movement.column).x + gameOptions.gemSize * movement.deltaColumn,
@@ -163,9 +157,6 @@ class playGame extends Phaser.Scene {
       if (deltaRow + deltaCol !== 0) {
         let pickedGem = this.match3.valueAt(selectedGem.row + deltaRow, selectedGem.column + deltaCol);
         if (pickedGem !== -1) {
-          // console.log('[!] selectedGem row / col: ', selectedGem.row, selectedGem.column);
-          console.log('[!] selected gem ', selectedGem);
-          console.log('[5] row / col: ', selectedGem.row, selectedGem.column);
           this.match3.customDataOf(selectedGem.row, selectedGem.column).setScale(1);
           this.swapGems(
             selectedGem.row + deltaRow,
@@ -201,8 +192,6 @@ class playGame extends Phaser.Scene {
     let gemsToRemove = this.match3.getMatchList();
     let destroyed = 0;
     gemsToRemove.forEach(function (gem) {
-      // console.log('[!] handleMatches row / col: ', gem.row, gem.column);
-      console.log('[6] row / col: ', gem.row, gem.column);
       this.poolArray.push(this.match3.customDataOf(gem.row, gem.column))
       destroyed++;
       this.incrementScore();
@@ -227,8 +216,6 @@ class playGame extends Phaser.Scene {
     let fallingMovements = this.match3.arrangeBoardAfterMatch();
     fallingMovements.forEach(function (movement) {
       moved++;
-      // console.log('[!] makeGemsFall row / col: ', movement.row, movement.column);
-      console.log('[7] row / col: ', movement.row, movement.column);
       this.tweens.add({
         targets: this.match3.customDataOf(movement.row, movement.column),
         y: this.match3.customDataOf(movement.row, movement.column).y + movement.deltaRow * gameOptions.gemSize,
