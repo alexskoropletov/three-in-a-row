@@ -7,7 +7,7 @@ function getRandomValue(max) {
   const range = max - 1;
   const max_range = 256;
   if (byteArray[0] >= Math.floor(max_range / range) * range) {
-    return getRandomValue(0, max);
+    return getRandomValue(max);
   }
   return byteArray[0] % range;
 }

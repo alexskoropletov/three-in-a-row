@@ -1,6 +1,6 @@
 {
-  "name": "dreamchaser-viruses-server",
-  "version": "0.0.1",
+  "name": "three-in-a-row-server",
+  "version": "0.0.4",
   "private": true,
   "scripts": {
     "start": "node app",
