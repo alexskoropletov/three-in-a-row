@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node app",
+    "precommit": "npm audit --low && eslint *.js --fix",
     "sonar": "node sonar-project.js"
   },
   "dependencies": {
@@ -14,9 +15,22 @@
     "morgan": "~1.9.0",
     "phaser": "^3.16.2",
     "pug": "^2.0.3",
+    "sonarqube-scanner": "^2.4.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "sonarqube-scanner": "^2.4.0"
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.17.2",
+    "husky": "^2.2.0",
+    "lint-staged": "^8.1.6"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run precommit"
+    }
+  },
+  "engines": {
+    "node": "8.x"
   }
 }
