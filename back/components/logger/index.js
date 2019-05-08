@@ -7,6 +7,8 @@ const logFormat = printf(({ level, message, label, timestamp }) => {
 
 module.exports = winston.createLogger({
   format: combine(
+    winston.format.colorize(),
+    winston.format.align(),
     label({ label: '!' }),
     timestamp(),
     logFormat
