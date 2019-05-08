@@ -2,8 +2,10 @@ const createError = require('http-errors');
 const cookieParser = require('cookie-parser');
 const express = require('express');
 const http = require('http');
-const logger = require('morgan');
 const path = require('path');
+const logger = require('./components/logger');
+
+logger.info('App initiating');
 
 const port = 3000;
 const routes = require('./routes');
@@ -12,7 +14,6 @@ const app = express();
 app
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'pug')
-  .use(logger('dev'))
   .use(express.json())
   .use(express.urlencoded({ extended: false }))
   .use(cookieParser())
@@ -32,5 +33,7 @@ app
 
 const server = http.createServer(app);
 server.listen(port);
+
+logger.info('App initiated');
 
 module.exports = app;
