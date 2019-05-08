@@ -9,6 +9,7 @@ logger.info('App initiating');
 
 const port = 3000;
 const routes = require('./routes');
+
 const app = express();
 
 app
@@ -21,9 +22,9 @@ app
   .use(express.static(path.join(__dirname, 'node_modules/phaser/dist')))
   .use('/', routes)
   .use((req, res, next) => {
-    next(createError(404))
+    next(createError(404));
   })
-  .use(function(err, req, res, next) {
+  .use((err, req, res) => {
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
     res.status(err.status || 500);
