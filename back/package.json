@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node app",
+    "precommit": "npm audit --low && eslint --fix",
     "sonar": "node sonar-project.js"
   },
   "dependencies": {
@@ -24,15 +25,9 @@
     "lint-staged": "^8.1.6",
     "sonarqube-scanner": "^2.4.0"
   },
-  "lint-staged": {
-    "*.js": [
-      "npm audit --low",
-      "eslint --fix"
-    ]
-  },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "npm run precommit"
     }
   },
   "engines": {
