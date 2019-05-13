@@ -95,11 +95,21 @@ class Match3 {
 
   // TODO: return the list of possible moves and rearrange field if it's empty
   possibleMoves() {
+    const result = [];
+    for (let i = 0; i < this.rows; i++) {
+      for (let j = 0; j < this.columns; j++) {
+        if (this.isPartOfMatch(i, j)) {
+          return true;
+        }
+      }
+    }
+    console.log('[!] result ', result);
     return true;
   }
 
   // returns true if there is a match in the board
   matchInBoard() {
+    this.possibleMoves();
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.columns; j++) {
         if (this.isPartOfMatch(i, j)) {
