@@ -14,6 +14,11 @@ class playGame extends Phaser.Scene {
   create() {
     this.match3 = new Match3(gameOptions.fieldOptions);
     this.match3.generateField();
+    let possibleMoves = this.match3.possibleMoves();
+    while (!possibleMoves.length) {
+      this.match3.generateField();
+      possibleMoves = this.match3.possibleMoves();
+    }
     this.canPick = true;
     this.dragging = false;
     this.drawField();
@@ -25,12 +30,12 @@ class playGame extends Phaser.Scene {
   drawField() {
     this.scoreText = this.add.text(16, 16, `Score: ${this.score}`, { fontSize: '28px', fill: '#fff' });
     this.poolArray = [];
-    for (let i = 0; i < this.match3.getRows(); i++) {
-      for (let j = 0; j < this.match3.getColumns(); j++) {
-        let gemX = gameOptions.boardOffset.x + gameOptions.gemSize * j + gameOptions.gemSize / 2;
-        let gemY = gameOptions.boardOffset.y + gameOptions.gemSize * i + gameOptions.gemSize / 2
-        let gem = this.add.sprite(gemX, gemY, "gems", this.match3.valueAt(i, j));
-        this.match3.setCustomData(i, j, gem);
+    for (let row = 0; row < this.match3.getRows(); row++) {
+      for (let column = 0; column < this.match3.getColumns(); column++) {
+        let gemX = gameOptions.boardOffset.x + gameOptions.gemSize * column + gameOptions.gemSize / 2;
+        let gemY = gameOptions.boardOffset.y + gameOptions.gemSize * row + gameOptions.gemSize / 2;
+        let gem = this.add.sprite(gemX, gemY, "gems", this.match3.valueAt(row, column));
+        this.match3.setCustomData(row, column, gem);
       }
     }
   }
@@ -70,14 +75,14 @@ class playGame extends Phaser.Scene {
     let movements = this.match3.swapItems(row, col, row2, col2);
     this.swappingGems = 2;
     this.canPick = false;
-    movements.forEach(function (movement) {
+    movements.forEach((movement) => {
       this.tweens.add({
         targets: this.match3.customDataOf(movement.row, movement.column),
         x: this.match3.customDataOf(movement.row, movement.column).x + gameOptions.gemSize * movement.deltaColumn,
         y: this.match3.customDataOf(movement.row, movement.column).y + gameOptions.gemSize * movement.deltaRow,
         duration: gameOptions.swapSpeed,
         callbackScope: this,
-        onComplete: function () {
+        onComplete: () => {
           this.swappingGems--;
           if (this.swappingGems === 0) {
             const isMatch = this.match3.matchInBoard();
@@ -131,7 +136,7 @@ class playGame extends Phaser.Scene {
           }
         }
       })
-    }.bind(this))
+    });
   }
 
 
@@ -191,8 +196,8 @@ class playGame extends Phaser.Scene {
   handleMatches() {
     let gemsToRemove = this.match3.getMatchList();
     let destroyed = 0;
-    gemsToRemove.forEach(function (gem) {
-      this.poolArray.push(this.match3.customDataOf(gem.row, gem.column))
+    gemsToRemove.forEach((gem) => {
+      this.poolArray.push(this.match3.customDataOf(gem.row, gem.column));
       destroyed++;
       this.incrementScore();
       this.tweens.add({
@@ -200,37 +205,58 @@ class playGame extends Phaser.Scene {
         alpha: 0,
         duration: gameOptions.destroySpeed,
         callbackScope: this,
-        onComplete: function (event, sprite) {
+        onComplete: () => {
           destroyed--;
-          if (destroyed == 0) {
+          if (destroyed === 0) {
             this.makeGemsFall();
           }
-        }
+        },
       });
-    }.bind(this));
+    });
   }
 
-  makeGemsFall() {
+  handleReset() {
+    let gemsToRemove = this.match3.getAllGems();
+    let destroyed = 0;
+    gemsToRemove.forEach((gem) => {
+      this.poolArray.push(this.match3.customDataOf(gem.row, gem.column));
+      destroyed++;
+      this.tweens.add({
+        targets: this.match3.customDataOf(gem.row, gem.column),
+        alpha: 0,
+        duration: gameOptions.destroySpeed,
+        callbackScope: this,
+        onComplete: () => {
+          destroyed--;
+          if (destroyed === 0) {
+            this.makeGemsFall(true);
+          }
+        },
+      });
+    });
+  }
+
+  makeGemsFall(all = false) {
     let moved = 0;
-    this.match3.removeMatches();
+    this.match3.removeMatches(all);
     let fallingMovements = this.match3.arrangeBoardAfterMatch();
-    fallingMovements.forEach(function (movement) {
+    fallingMovements.forEach((movement) => {
       moved++;
       this.tweens.add({
         targets: this.match3.customDataOf(movement.row, movement.column),
         y: this.match3.customDataOf(movement.row, movement.column).y + movement.deltaRow * gameOptions.gemSize,
         duration: gameOptions.fallSpeed * Math.abs(movement.deltaRow),
         callbackScope: this,
-        onComplete: function () {
+        onComplete: () => {
           moved--;
-          if (moved == 0) {
+          if (!moved) {
             this.endOfMove()
           }
         }
       })
-    }.bind(this));
+    });
     let replenishMovements = this.match3.replenishBoard();
-    replenishMovements.forEach(function (movement) {
+    replenishMovements.forEach((movement) => {
       moved++;
       let sprite = this.poolArray.pop();
       sprite.alpha = 1;
@@ -243,14 +269,14 @@ class playGame extends Phaser.Scene {
         y: gameOptions.boardOffset.y + gameOptions.gemSize * movement.row + gameOptions.gemSize / 2,
         duration: gameOptions.fallSpeed * movement.deltaRow,
         callbackScope: this,
-        onComplete: function () {
+        onComplete: () => {
           moved--;
-          if (moved == 0) {
+          if (!moved) {
             this.endOfMove()
           }
         }
       });
-    }.bind(this))
+    });
   }
 
   endOfMove() {
@@ -259,10 +285,12 @@ class playGame extends Phaser.Scene {
         delay: 250,
         callback: this.handleMatches()
       });
-    }
-    else {
+    } else {
       this.canPick = true;
       this.selectedGem = null;
+      if(!this.match3.possibleMoves().length) {
+        this.handleReset();
+      }
     }
   }
 }
