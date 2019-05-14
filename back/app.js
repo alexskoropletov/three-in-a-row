@@ -3,9 +3,6 @@ const cookieParser = require('cookie-parser');
 const express = require('express');
 const http = require('http');
 const path = require('path');
-const logger = require('./components/logger');
-
-logger.info('App initiating');
 
 const port = 3000;
 const routes = require('./routes');
@@ -34,7 +31,5 @@ app
 
 const server = http.createServer(app);
 server.listen(port);
-
-logger.info('App initiated');
 
 module.exports = app;

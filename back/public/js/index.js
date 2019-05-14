@@ -9,9 +9,9 @@ let gameOptions = {
     y: 50
   },
   fieldOptions: {
-    rows: 7,
+    rows: 8,
     columns: 5,
-    items: 7
+    items: 8
   }
 };
 

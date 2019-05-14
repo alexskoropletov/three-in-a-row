@@ -70,39 +70,82 @@ class Match3 {
     this.rows = obj.rows;
     this.columns = obj.columns;
     this.items = obj.items;
+    this.gameArray = [];
   }
 
   // generates the game field
   generateField() {
     this.gameArray = [];
     this.selectedItem = false;
-    for (let i = 0; i < this.rows; i++) {
-      this.gameArray[i] = [];
-      for (let j = 0; j < this.columns; j++) {
+    for (let row = 0; row < this.rows; row++) {
+      this.gameArray[row] = [];
+      for (let column = 0; column < this.columns; column++) {
         do {
           let randomValue = getRandomValue(this.items);
-          this.gameArray[i][j] = {
+          this.gameArray[row][column] = {
             value: randomValue,
             quark: quarks[randomValue],
             isEmpty: false,
-            row: i,
-            column: j
+            row,
+            column,
           }
-        } while (this.isPartOfMatch(i, j));
+        } while (this.isPartOfMatch(row, column));
       }
     }
   }
 
   // TODO: return the list of possible moves and rearrange field if it's empty
   possibleMoves() {
-    return true;
+    const result = [];
+    for (let row = 0; row < this.rows; row++) {
+      for (let column = 0; column < this.columns; column++) {
+        // the idea:
+        // - move current item left / right / up / down
+        // - check for matches each time
+        // - save current item and directions
+
+        // 1) moving up
+        if (this.valueAt(row - 1, column)) {
+          this.swapItems(row, column, row - 1, column);
+          if (this.matchInBoard()) {
+            result.push({ row, column, direction: 'up' });
+          }
+          this.swapItems(row, column, row - 1, column);
+        }
+        // 2) moving down
+        if (this.valueAt(row + 1, column)) {
+          this.swapItems(row, column, row + 1, column);
+          if (this.matchInBoard()) {
+            result.push({ row, column, direction: 'down' });
+          }
+          this.swapItems(row, column, row + 1, column);
+        }
+        // 3) moving left
+        if (this.valueAt(row, column - 1)) {
+          this.swapItems(row, column, row, column - 1);
+          if (this.matchInBoard()) {
+            result.push({ row, column, direction: 'left' });
+          }
+          this.swapItems(row, column, row, column - 1);
+        }
+        // 4) moving right
+        if (this.valueAt(row, column + 1)) {
+          this.swapItems(row, column, row, column + 1);
+          if (this.matchInBoard()) {
+            result.push({ row, column, direction: 'right' });
+          }
+          this.swapItems(row, column, row, column + 1);
+        }
+      }
+    }
+    return result;
   }
 
   // returns true if there is a match in the board
   matchInBoard() {
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < this.columns; j++) {
-        if (this.isPartOfMatch(i, j)) {
+    for (let row = 0; row < this.rows; row++) {
+      for (let column = 0; column < this.columns; column++) {
+        if (this.isPartOfMatch(row, column)) {
           return true;
         }
       }
@@ -112,9 +155,9 @@ class Match3 {
 
   // returns true if there is a match in the board
   baryonInBoard() {
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < this.columns; j++) {
-        if (this.isBaryon(i, j)) {
+    for (let row = 0; row < this.rows; row++) {
+      for (let column = 0; column < this.columns; column++) {
+        if (this.isBaryon(row, column)) {
           return true;
         }
       }
@@ -122,6 +165,7 @@ class Match3 {
     return false;
   }
 
+  // TODO: get a more elegant approach in matching patterns
   // returns true if the item at (row, column) is part of a match
   isPartOfMatch(row, column) {
     return this.isPartOfHorizontalMatch(row, column)
@@ -159,7 +203,7 @@ class Match3 {
       && this.valueAt(row, column) === this.valueAt(row, column - 1)
   }
 
-  // returns true if the item at (row, column) is part of an horizontal match
+  // returns true if the item at (row, column) is part of an baryon
   isBaryon(row, column) {
     const vals = {
       columns: {},
@@ -300,14 +344,22 @@ class Match3 {
   // return the items part of a match in the board as an array of {row, column} object
   getMatchList() {
     let matches = [];
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < this.columns; j++) {
-        if (this.isPartOfMatch(i, j)) {
-          matches.push({
-            row: i,
-            column: j
-          });
+    for (let row = 0; row < this.rows; row++) {
+      for (let column = 0; column < this.columns; column++) {
+        if (this.isPartOfMatch(row, column)) {
+          matches.push({ row, column });
         }
+      }
+    }
+    return matches;
+  }
+
+  // return the items part of a match in the board as an array of {row, column} object
+  getAllGems() {
+    let matches = [];
+    for (let row = 0; row < this.rows; row++) {
+      for (let column = 0; column < this.columns; column++) {
+        matches.push({ row, column });
       }
     }
     return matches;
@@ -316,39 +368,37 @@ class Match3 {
   // return the items part of a match in the board as an array of {row, column} object
   getCombinationList() {
     const adrons = [];
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < this.columns; j++) {
-        const adron = this.isBaryon(i, j);
+    for (let row = 0; row < this.rows; row++) {
+      for (let column = 0; column < this.columns; column++) {
+        const adron = this.isBaryon(row, column);
         if (adron) {
-          adrons.push({ ...adron, i, j });
-          console.log('[!] adron ', adron, ' at row ', i, ' and column ', j);
+          adrons.push({ ...adron, row, column });
+          console.log('[!] adron ', adron, ' at row ', row, ' and column ', column);
           console.log(
             '[!] set empty at ',
             Number(i) + adron.direction === 'rows' ? Number(adron.offset1) : 0,
-            Number(j) + adron.direction === 'columns' ? Number(adron.offset1) : 0
+            Number(column) + adron.direction === 'columns' ? Number(adron.offset1) : 0
           );
           this.setEmpty(
             Number(i) + adron.direction === 'rows' ? Number(adron.offset1) : 0,
-            Number(j) + adron.direction === 'columns' ? Number(adron.offset1) : 0
+            Number(column) + adron.direction === 'columns' ? Number(adron.offset1) : 0
           );
           console.log(
             '[!] set empty at ',
             i + adron.direction === 'rows' ? adron.offset2 : 0,
-            j + adron.direction === 'columns' ? adron.offset2 : 0
+            column + adron.direction === 'columns' ? adron.offset2 : 0
           );
           this.setEmpty(
             i + adron.direction === 'rows' ? adron.offset2 : 0,
-            j + adron.direction === 'columns' ? adron.offset2 : 0
+            column + adron.direction === 'columns' ? adron.offset2 : 0
           );
-          console.log('[!] set value 7 at', i, j);
-          this.setValue(i, j, 7);
+          console.log('[!] set value 7 at', row, column);
+          this.setValue(row, column, 7);
           // TODO: set empty to offset gems
           // TODO: replace origin gem with extra gem
-          // this.setEmpty(i, j);
+          // this.setEmpty(row, column);
           // if ()
-          // this.setEmpty(i, j);
-
-
+          // this.setEmpty(row, column);
         }
       }
     }
@@ -356,11 +406,14 @@ class Match3 {
   }
 
   // removes all items forming a match
-  removeMatches() {
+  removeMatches(all = false) {
     let matches = this.getMatchList();
-    matches.forEach(function (item) {
+    if (all) {
+      matches = this.getAllGems();
+    }
+    matches.forEach((item) => {
       this.setEmpty(item.row, item.column)
-    }.bind(this))
+    });
   }
 
   // set the item at (row, column) as empty
@@ -376,9 +429,9 @@ class Match3 {
   // returns the amount of empty spaces below the item at (row, column)
   emptySpacesBelow(row, column) {
     let result = 0;
-    if (row != this.getRows()) {
-      for (let i = row + 1; i < this.getRows(); i++) {
-        if (this.isEmpty(i, column)) {
+    if (row !== this.rows) {
+      for (let iterateRow = row + 1; iterateRow < this.rows; iterateRow++) {
+        if (this.isEmpty(iterateRow, column)) {
           result++;
         }
       }
@@ -388,17 +441,17 @@ class Match3 {
 
   // arranges the board after a match, making items fall down. Returns an object with movement information
   arrangeBoardAfterMatch() {
-    let result = []
-    for (let i = this.getRows() - 2; i >= 0; i--) {
-      for (let j = 0; j < this.getColumns(); j++) {
-        let emptySpaces = this.emptySpacesBelow(i, j);
-        if (!this.isEmpty(i, j) && emptySpaces > 0) {
-          this.swapItems(i, j, i + emptySpaces, j)
+    let result = [];
+    for (let row = this.rows - 2; row >= 0; row--) {
+      for (let column = 0; column < this.columns; column++) {
+        let emptySpaces = this.emptySpacesBelow(row, column);
+        if (!this.isEmpty(row, column) && emptySpaces > 0) {
+          this.swapItems(row, column, row + emptySpaces, column)
           result.push({
-            row: i + emptySpaces,
-            column: j,
+            row: row + emptySpaces,
+            column,
             deltaRow: emptySpaces,
-            deltaColumn: 0
+            deltaColumn: 0,
           });
         }
       }
@@ -409,19 +462,19 @@ class Match3 {
   // replenished the board and returns an object with movement information
   replenishBoard() {
     let result = [];
-    for (let i = 0; i < this.getColumns(); i++) {
-      if (this.isEmpty(0, i)) {
-        let emptySpaces = this.emptySpacesBelow(0, i) + 1;
-        for (let j = 0; j < emptySpaces; j++) {
+    for (let column = 0; column < this.columns; column++) {
+      if (this.isEmpty(0, column)) {
+        let emptySpaces = this.emptySpacesBelow(0, column) + 1;
+        for (let row = 0; row < emptySpaces; row++) {
           let randomValue = getRandomValue(this.items);
           result.push({
-            row: j,
-            column: i,
+            row,
+            column,
             deltaRow: emptySpaces,
-            deltaColumn: 0
+            deltaColumn: 0,
           });
-          this.gameArray[j][i].value = randomValue;
-          this.gameArray[j][i].isEmpty = false;
+          this.gameArray[row][column].value = randomValue;
+          this.gameArray[row][column].isEmpty = false;
         }
       }
     }
